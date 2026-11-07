@@ -1,0 +1,51 @@
+import urllib.request
+import json
+import time
+import sqlite3
+
+TOKEN = "CIIBID0UGFEVDWLXDLMPWFCLSYEAJEXCNFSMGJBRMARHCOWILXFZFJPMXJYLVDWC"
+
+def call_api(method, payload=None):
+    url = f"https://botapi.rubika.ir/v3/{TOKEN}/{method}"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    if payload:
+        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method='POST')
+    else:
+        req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            raw_data = response.read().decode('utf-8')
+            return json.loads(raw_data)
+    except Exception as e:
+        return None
+
+def init_db():
+    conn = sqlite3.connect('game.db')
+    cursor = conn.cursor()
+    cursor.execute('CREATE TABLE IF NOT EXISTS players (chat_id TEXT PRIMARY KEY, country TEXT, money INTEGER DEFAULT 0, satisfaction INTEGER DEFAULT 50, status TEXT DEFAULT "active")')
+    conn.commit()
+    conn.close()
+
+def main():
+    init_db()
+    print("Bot is Online and Ready!")
+    last_update_id = 0
+    while True:
+        res = call_api("getUpdates", {"offset_id": last_update_id} if last_update_id else {})
+        if res and res.get("status") == "OK":
+            for update in res.get("updates", []):
+                last_update_id = update["update_id"] + 1
+                if update.get("type") == "NewMessage":
+                    msg = update.get("new_message", {})
+                    chat_id = msg.get("sender_id")
+                    text = msg.get("text", "")
+                    print(f"Message from {chat_id}: {text}")
+                    if text == "/start":
+                        call_api("sendMessage", {
+                            "chat_id": chat_id,
+                            "text": "سلام! به ربات مدیریت جنگ خوش آمدید. 🚀\nمن آماده دریافت دستورات هستم."
+                        })
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()
