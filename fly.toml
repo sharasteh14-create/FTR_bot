@@ -1,0 +1,7 @@
+app = "ftr-war-bot"
+
+[build]
+  builder = "paketobuildpacks/builder:base"
+
+[env]
+  PORT = "8080"
