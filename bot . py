@@ -1,0 +1,67 @@
+import rubpy
+import asyncio
+
+TOKEN = "CIIBID0UGFEVDWLXDLMPWFCLSYEAJEXCNFSMGJBRMARHCOWILXFZFJPMXJYLVDWC"
+CHANNEL_ID = "@FTR_WAR"
+
+bot = rubpy.Client(TOKEN)
+
+main_keyboard = rubpy.Keypad(
+    rows=[
+        [rubpy.Button(text="🏴 گرفتن کشور", id="btn_country")],
+        [rubpy.Button(text="⚔️ اقدامات فعالیت", id="btn_actions")]
+    ]
+)
+
+actions_keyboard = rubpy.Keypad(
+    rows=[
+        [rubpy.Button(text="📜 صدور بیانیه", id="btn_statement")],
+        [rubpy.Button(text="🚚 ترابری", id="btn_transport")],
+        [rubpy.Button(text="💰 فعالیت اقتصادی", id="btn_economy")],
+        [rubpy.Button(text="⚙️ تولید روزانه", id="btn_production")],
+        [rubpy.Button(text="🔬 اختراع و تحقیقات", id="btn_research")],
+        [rubpy.Button(text="🛢 مبادله نفت", id="btn_oil")],
+        [rubpy.Button(text="⚔️ عملیات نظامی", id="btn_military")],
+        [rubpy.Button(text="💻 عملیات سایبری", id="btn_cyber")],
+        [rubpy.Button(text="🛡 عملیات دفاعی", id="btn_defense")],
+        [rubpy.Button(text="🕊 پیمان صلح", id="btn_peace")],
+        [rubpy.Button(text="🎖 رزمایش نظامی", id="btn_drill")],
+        [rubpy.Button(text="🔫 ترور", id="btn_assassination")]
+    ]
+)
+
+@bot.on_message()
+async def handle_messages(client, message):
+    text = message.text
+    chat_id = message.chat_id
+
+    if text == "/start":
+        await client.send_message(
+            chat_id=chat_id,
+            text="سلام! به ربات مدیریت جنگ FTR خوش آمدید. 🚀",
+            chat_keypad=main_keyboard
+        )
+
+    elif text == "⚔️ اقدامات فعالیت":
+        await client.send_message(
+            chat_id=chat_id,
+            text="منوی اقدامات:",
+            chat_keypad=actions_keyboard
+        )
+
+    elif text == "📜 صدور بیانیه":
+        await client.send_message(chat_id=chat_id, text="متن بیانیه را با /بیانیه ارسال کنید.")
+
+    elif text.startswith("/بیانیه "):
+        statement_text = text.replace("/بیانیه ", "")
+        await client.send_message(
+            chat_id=CHANNEL_ID,
+            text=statement_text
+        )
+        await client.send_message(chat_id=chat_id, text="ارسال شد.")
+
+async def main():
+    await bot.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
